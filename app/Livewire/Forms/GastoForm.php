@@ -45,8 +45,7 @@ class GastoForm extends Form {
 
     public function save(): void {
         $this->validate();
-        Gasto::updateOrCreate(['id' => $this->id],
-        [
+        Gasto::updateOrCreate(['id' => $this->id], [
             'folio' => $this->folio,
             'fecha' => $this->fecha,
             'categoria_id' => $this->categoria_id,
@@ -55,25 +54,31 @@ class GastoForm extends Form {
             'cantidad' => $this->cantidad,
             'observaciones' => $this->observaciones,
         ]);
-        $this->reset();
     }
 
     public function headers(): array {
         return [
-            ['key' => 'id', 'label' => '#', 'class' => 'w-1'],
-            ['key' => 'folio', 'label' => 'Folio', 'class' => 'w-30'],
-            ['key' => 'fecha', 'label' => 'Fecha', 'class' => 'w-30', 'format' => ['date', 'd-M-Y']],
-            ['key' => 'categoria.nombre', 'label' => 'Categoria', 'class' => 'w-20'],
-            ['key' => 'monto', 'label' => 'Monto', 'class' => 'w-20', 'format' => ['currency', '2,.', '$ ']],
-            ['key' => 'producto', 'label' => 'Producto', 'class' => 'w-20'],
-            ['key' => 'cantidad', 'label' => 'Cantidad', 'class' => 'w-20'],
-            ['key' => 'observaciones', 'label' => 'Observaciones', 'class' => 'w-20'],
+            ['key' => 'folio', 'label' => 'Folio', 'class' => 'text-lg font-bold'],
+            // ['key' => 'fecha', 'label' => 'Fecha', 'class' => 'w-30', 'format' => ['date', 'd-M-Y']],
+            // ['key' => 'categoria.nombre', 'label' => 'Categoria', 'class' => 'w-20'],
+            // ['key' => 'monto', 'label' => 'Monto', 'class' => 'w-20', 'format' => ['currency', '2,.', '$ ']],
+            // ['key' => 'producto', 'label' => 'Producto', 'class' => 'w-20'],
+            // ['key' => 'cantidad', 'label' => 'Cantidad', 'class' => 'w-20'],
+            // ['key' => 'observaciones', 'label' => 'Observaciones', 'class' => 'w-20'],
         ];
     }
     public function gastos($sortBy, $search): Collection {
-        return Gasto::where('folio', 'like', "%{$search}%")
+        $gasto = Gasto::where('folio', 'like', "%{$search}%")
         ->orderBy($sortBy['column'], $sortBy['direction'])
         ->get();
+        $array = $gasto->toArray();
+        $collection = collect($array);
+        $grouped = $collection->groupBy(function (array $item, int $key) {
+            return $item['folio'];
+        });
+        // // dd($collection);
+        // dd($grouped);
+        return $grouped;
     }
 
     public function edit($id): void {
@@ -86,6 +91,6 @@ class GastoForm extends Form {
         $this->producto = $gasto->producto;
         $this->cantidad = $gasto->cantidad;
         $this->observaciones = $gasto->observaciones;
-        $this->id = $gasto->id;
+        $this->id = $gasto->id; //? id del registro a editar
     }
 }

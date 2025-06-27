@@ -46,9 +46,9 @@
                     <x-menu-separator />
                 @endif
 
-                <x-menu-item title="Inicio" icon="o-home" link="/" />
+                {{-- <x-menu-item title="Inicio" icon="o-home" link="/" /> --}}
 
-                <x-menu-item title="Productos" icon="o-circle-stack" link="/productos" />
+                {{-- <x-menu-item title="Productos" icon="o-circle-stack" link="/productos" /> --}}
 
                 <x-menu-item title="Gastos" icon="o-currency-dollar" link="/gastos" />
 
