@@ -30,6 +30,7 @@ class GastoForm extends Form {
     public string $observaciones = '';
 
     public $id = null;
+    public $gastos = [];
 
     public function rules(): array {
         return [
@@ -59,12 +60,6 @@ class GastoForm extends Form {
     public function headers(): array {
         return [
             ['key' => 'folio', 'label' => 'Folio', 'class' => 'text-lg font-bold'],
-            // ['key' => 'fecha', 'label' => 'Fecha', 'class' => 'w-30', 'format' => ['date', 'd-M-Y']],
-            // ['key' => 'categoria.nombre', 'label' => 'Categoria', 'class' => 'w-20'],
-            // ['key' => 'monto', 'label' => 'Monto', 'class' => 'w-20', 'format' => ['currency', '2,.', '$ ']],
-            // ['key' => 'producto', 'label' => 'Producto', 'class' => 'w-20'],
-            // ['key' => 'cantidad', 'label' => 'Cantidad', 'class' => 'w-20'],
-            // ['key' => 'observaciones', 'label' => 'Observaciones', 'class' => 'w-20'],
         ];
     }
     public function gastos($sortBy, $search): Collection {
@@ -73,12 +68,10 @@ class GastoForm extends Form {
         ->get();
         $array = $gasto->toArray();
         $collection = collect($array);
-        $grouped = $collection->groupBy(function (array $item, int $key) {
+        $this->gastos = $collection->groupBy(function (array $item, int $key) {
             return $item['folio'];
         });
-        // // dd($collection);
-        // dd($grouped);
-        return $grouped;
+        return $this->gastos;
     }
 
     public function edit($id): void {
@@ -92,5 +85,11 @@ class GastoForm extends Form {
         $this->cantidad = $gasto->cantidad;
         $this->observaciones = $gasto->observaciones;
         $this->id = $gasto->id; //? id del registro a editar
+    }
+
+    public function export() {
+        // dd($this->gastos);
+        // Exportar a excel
+        $this->gastos->export('gastos.xlsx');
     }
 }

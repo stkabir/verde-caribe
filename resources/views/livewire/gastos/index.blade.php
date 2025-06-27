@@ -69,6 +69,9 @@ new class extends Component {
     public function endOrder(): void {
         $this->form->reset();
     }
+    public function export(): void {
+        $this->form->export();
+    }
 };
 ?>
 <div>
@@ -109,27 +112,48 @@ new class extends Component {
                 </div>
             </div>
             <x-slot:actions>
-                <x-button label="Guardar" class="btn-success" type="submit" spinner="save" />
-                <x-button label="Terminar orden" class="btn-primary" type="button" wire:click.prevent="end" spinner="end" />
+                <x-button label="Guardar" class="btn-primary" type="submit" spinner="save" />
+                <x-button label="Terminar orden" class="btn-secondary" type="button" wire:click.prevent="end" spinner="end" />
             </x-slot:actions>
         </x-card>
     </x-form>
     <hr class="border-t-[length:var(--border)] border-base-content/10 my-3">
     {{-- * TABLA --}}
     <x-card shadow>
+        <div class="flex justify-end">
+            <x-button class="btn-warning" type="button" wire:click.prevent="export" spinner="export" icon="o-arrow-down-tray"/>
+        </div>
         <x-table :headers="$headers" :rows="$gastos" :sort-by="$sortBy">
-            {{-- @foreach($gastos as $gasto)
-                @foreach($gasto as $item)
-                    {{ $item['folio'] }}
-                @endforeach
-            @endforeach --}}
             @scope('cell_folio', $gasto)
-                {{ $gasto[0]['folio'] }}
-                @foreach($gasto as $item)
-                    <li>{{ $item['fecha'] }}</li>
-                @endforeach
+                <p class="text-2xl uppercase">{{ $gasto[0]['folio'] }}</p>
+                <div class="py-1 px-4 rounded-md bg-base-content/10">
+                    @foreach($gasto as $item)
+                        <div class="grid grid-cols-13 my-4 items-center">
+                            <div class="col-span-2">
+                                <p>{{ $item['fecha'] }}</p>
+                            </div>
+                            <div class="col-span-1">
+                                <p>{{ $item['categoria_id'] }}</p>
+                            </div>
+                            <div class="col-span-1">
+                                <p>{{ $item['monto'] }}</p>
+                            </div>
+                            <div class="col-span-2">
+                                <p>{{ $item['producto'] }}</p>
+                            </div>
+                            <div class="col-span-1">
+                                <p>{{ $item['cantidad'] }}</p>
+                            </div>
+                            <div class="col-span-5">
+                                <p>{{ $item['observaciones'] }}</p>
+                            </div>
+                            <div class="col-auto text-end">
+                                <x-button class="btn-success" type="button" wire:click.prevent="edit({{ $item['id'] }})" spinner="edit" icon="o-pencil" />
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
             @endscope
-
         </x-table>
     </x-card>
 </div>
