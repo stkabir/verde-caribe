@@ -2,8 +2,10 @@
 
 namespace App\Livewire\Forms;
 
+use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Collection;
 use Livewire\Attributes\Validate;
+use App\Exports\GastosExport;
 use App\Models\Gasto;
 use Livewire\Form;
 
@@ -88,8 +90,8 @@ class GastoForm extends Form {
     }
 
     public function export() {
-        // dd($this->gastos);
+        // var_dump($this->gastos);
         // Exportar a excel
-        $this->gastos->export('gastos.xlsx');
+        return Excel::download(new GastosExport, 'gastos.xlsx');
     }
-}
+}*/

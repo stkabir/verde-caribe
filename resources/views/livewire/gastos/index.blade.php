@@ -69,7 +69,7 @@ new class extends Component {
     public function endOrder(): void {
         $this->form->reset();
     }
-    public function export(): void {
+    public function export() {
         $this->form->export();
     }
 };
