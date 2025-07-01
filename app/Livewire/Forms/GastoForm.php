@@ -94,4 +94,4 @@ class GastoForm extends Form {
         // Exportar a excel
         return Excel::download(new GastosExport, 'gastos.xlsx');
     }
-}*/
+}
