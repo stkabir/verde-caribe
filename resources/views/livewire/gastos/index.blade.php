@@ -1,6 +1,8 @@
 <?php
 
 use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\GastosExport;
 use Illuminate\Support\Collection;
 use App\Livewire\Forms\GastoForm;
 use Livewire\Volt\Component;
@@ -44,8 +46,8 @@ new class extends Component {
         return $this->form->headers();
     }
 
-    public function gastos(): Collection {
-        return $this->form->gastos($this->sortBy, $this->search);
+    public function gastos($export = false): Collection {
+        return $this->form->gastos($this->sortBy, $this->search, $export);
     }
 
     public function with(): array {
@@ -59,7 +61,7 @@ new class extends Component {
         $this->form->edit($id);
     }
     public function end(): void {
-        LivewireAlert::title('Terminar orden?')->withConfirmButton('Terminar')->withCancelButton('Cancelar')
+        LivewireAlert::title('¿Terminar orden?')->withConfirmButton('Si, terminar')->withCancelButton('No')
         ->onConfirm('endOrder')
         ->withOptions([
             'background' => 'oklch(28.33% 0.016 252.42)',
@@ -70,7 +72,8 @@ new class extends Component {
         $this->form->reset();
     }
     public function export() {
-        $this->form->export();
+        return Excel::download(new GastosExport($this->gastos(true)), 'gastos.xlsx');
+        // $this->form->export();
     }
 };
 ?>
@@ -113,7 +116,7 @@ new class extends Component {
             </div>
             <x-slot:actions>
                 <x-button label="Guardar" class="btn-primary" type="submit" spinner="save" />
-                <x-button label="Terminar orden" class="btn-secondary" type="button" wire:click.prevent="end" spinner="end" />
+                <x-button label="Terminar orden" class="btn-error btn-soft" type="button" wire:click.prevent="end" spinner="end" />
             </x-slot:actions>
         </x-card>
     </x-form>
@@ -121,34 +124,34 @@ new class extends Component {
     {{-- * TABLA --}}
     <x-card shadow>
         <div class="flex justify-end">
-            <x-button class="btn-warning" type="button" wire:click.prevent="export" spinner="export" icon="o-arrow-down-tray"/>
+            <x-button class="btn-success" type="button" wire:click.prevent="export" spinner="export" icon="o-arrow-down-tray" tooltip="Exportar"/>
         </div>
         <x-table :headers="$headers" :rows="$gastos" :sort-by="$sortBy">
             @scope('cell_folio', $gasto)
-                <p class="text-2xl uppercase">{{ $gasto[0]['folio'] }}</p>
-                <div class="py-1 px-4 rounded-md bg-base-content/10">
-                    @foreach($gasto as $item)
-                        <div class="grid grid-cols-13 my-4 items-center">
-                            <div class="col-span-2">
+                <p class="text-2xl uppercase text-emerald-700">{{ $gasto['folio'] . ' - ' . $gasto['total'] }}</p>
+                <div class="rounded-md font-medium">
+                    @foreach($gasto['gastos'] as $item)
+                        <div class="grid md:grid-flow-row lg:grid-flow-col lg:grid-cols-13 my-4 items-center bg-base-content/10">
+                            <div class="lg:col-span-2">
                                 <p>{{ $item['fecha'] }}</p>
                             </div>
-                            <div class="col-span-1">
-                                <p>{{ $item['categoria_id'] }}</p>
+                            <div class="lg:col-span-2">
+                                <p>{{ $item['nombre'] }}</p>
                             </div>
-                            <div class="col-span-1">
-                                <p>{{ $item['monto'] }}</p>
+                            <div class="lg:col-span-2">
+                                <p>{{ $item['monto'] }}$</p>
                             </div>
-                            <div class="col-span-2">
+                            <div class="lg:col-span-2">
                                 <p>{{ $item['producto'] }}</p>
                             </div>
-                            <div class="col-span-1">
+                            <div class="lg:col-span-1">
                                 <p>{{ $item['cantidad'] }}</p>
                             </div>
-                            <div class="col-span-5">
+                            <div class="lg:col-span-5">
                                 <p>{{ $item['observaciones'] }}</p>
                             </div>
-                            <div class="col-auto text-end">
-                                <x-button class="btn-success" type="button" wire:click.prevent="edit({{ $item['id'] }})" spinner="edit" icon="o-pencil" />
+                            <div class="lg:col-span-1 text-end">
+                                <x-button class="btn-warning btn-sm btn-soft" type="button" wire:click.prevent="edit({{ $item['id'] }})" spinner="edit" icon="o-pencil" tooltip="Editar"/>
                             </div>
                         </div>
                     @endforeach

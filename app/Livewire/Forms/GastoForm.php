@@ -2,10 +2,8 @@
 
 namespace App\Livewire\Forms;
 
-use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Collection;
 use Livewire\Attributes\Validate;
-use App\Exports\GastosExport;
 use App\Models\Gasto;
 use Livewire\Form;
 
@@ -64,15 +62,28 @@ class GastoForm extends Form {
             ['key' => 'folio', 'label' => 'Folio', 'class' => 'text-lg font-bold'],
         ];
     }
-    public function gastos($sortBy, $search): Collection {
-        $gasto = Gasto::where('folio', 'like', "%{$search}%")
+    public function gastos($sortBy, $search, $export = false): Collection {
+        $gasto = Gasto::where('folio', 'like', "%{$search}%")->leftJoin('categorias', 'gastos.categoria_id', 'categorias.id')
         ->orderBy($sortBy['column'], $sortBy['direction'])
         ->get();
+        if($export) {
+            return $gasto->select('folio', 'fecha', 'nombre', 'monto', 'producto', 'cantidad', 'observaciones');
+        }
         $array = $gasto->toArray();
         $collection = collect($array);
-        $this->gastos = $collection->groupBy(function (array $item, int $key) {
+        $agrupados = $collection->groupBy(function (array $item, int $key) {
             return $item['folio'];
         });
+        $resultado = $agrupados->map(function ($items, $folio) {
+            $total = collect($items)->sum('monto');
+            return [
+                'folio' => $folio,
+                'gastos' => $items,
+                'total' => number_format($total, 2).'$',
+            ];
+        })->values();
+
+        $this->gastos = $resultado;
         return $this->gastos;
     }
 
@@ -87,11 +98,5 @@ class GastoForm extends Form {
         $this->cantidad = $gasto->cantidad;
         $this->observaciones = $gasto->observaciones;
         $this->id = $gasto->id; //? id del registro a editar
-    }
-
-    public function export() {
-        // var_dump($this->gastos);
-        // Exportar a excel
-        return Excel::download(new GastosExport, 'gastos.xlsx');
     }
 }
