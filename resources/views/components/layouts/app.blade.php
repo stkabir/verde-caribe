@@ -50,6 +50,7 @@
 
                 {{-- <x-menu-item title="Productos" icon="o-circle-stack" link="/productos" /> --}}
 
+                <x-menu-item title="Categorias" icon="o-clipboard" link="/categorias" />
                 <x-menu-item title="Gastos" icon="o-currency-dollar" link="/gastos" />
 
                 {{-- <x-menu-item title="Inicio" icon="o-home" link="/" /> --}}
