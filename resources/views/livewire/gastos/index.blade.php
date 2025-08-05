@@ -7,6 +7,7 @@ use Illuminate\Support\Collection;
 use App\Livewire\Forms\GastoForm;
 use Livewire\Volt\Component;
 use App\Models\Categoria;
+use App\Models\Gasto;
 
 new class extends Component {
 
@@ -58,7 +59,9 @@ new class extends Component {
     }
 
     public function edit($id): void {
+        // hacer scroll al formulario
         $this->form->edit($id);
+        $this->dispatch('scrollTo', id: 'form');
     }
     public function end(): void {
         LivewireAlert::title('¿Terminar orden?')->withConfirmButton('Si, terminar')->withCancelButton('No')
@@ -75,6 +78,24 @@ new class extends Component {
         return Excel::download(new GastosExport($this->gastos(true)), 'gastos.xlsx');
         // $this->form->export();
     }
+    public function delete($id): void {
+        LivewireAlert::title('¿Eliminar gasto?')->withConfirmButton('Si, eliminar')->withCancelButton('No')
+        ->onConfirm('deleteConfirm', ['id' => $id])
+        ->withOptions([
+            'background' => 'oklch(28.33% 0.016 252.42)',
+            'color' => 'white',
+        ])->show();
+    }
+    public function deleteConfirm($id): void {
+        $gasto = Gasto::find($id['id']);
+        $gasto->delete();
+        LivewireAlert::title('Exito')->text('Se elimino correctamente')->success()
+        ->toast()->position('center')->timer(1500)
+        ->withOptions([
+            'background' => 'oklch(28.33% 0.016 252.42)',
+            'color' => 'white',
+        ])->show();
+    }
 };
 ?>
 <div>
@@ -87,7 +108,7 @@ new class extends Component {
     {{-- * FORM --}}
     <x-form wire:submit.prevent="save" no-separator>
         <x-card shadow>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="form">
                 <div>
                     <x-input label="Folio" wire:model.live.debounce.250="form.folio" placeholder="Folio" inline first-error-only />
                 </div>
@@ -97,20 +118,22 @@ new class extends Component {
             </div>
         </x-card>
         <x-card shadow>
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div>
+            <div class="grid grid-cols-4 gap-4">
+                <div class="col-span-4 md:col-span-2">
                     <x-select label="Categoría" wire:model="form.categoria_id" placeholder="Selecciona una opción" inline first-error-only :options="$categorias" option-label="nombre"/>
                 </div>
-                <div>
-                    <x-input label="Cantidad" wire:model.live.debounce.250="form.cantidad" placeholder="Cantidad" inline first-error-only />
-                </div>
-                <div>
+                <div class="col-span-4 md:col-span-2">
                     <x-input label="Producto" wire:model.live.debounce.250="form.producto" placeholder="Producto" inline first-error-only />
                 </div>
-                <div>
+                <div class="col-span-2">
                     <x-input label="Monto" wire:model.live.debounce.250="form.monto" placeholder="Monto" inline first-error-only />
                 </div>
-                <div class="col-span-4">
+                <div class="col-span-2">
+                    <x-input label="Cantidad" wire:model.live.debounce.250="form.cantidad" placeholder="Cantidad" inline first-error-only />
+                </div>
+            </div>
+            <div class="grid grid-cols-1 mt-4">
+                <div class="col-span-1">
                     <x-textarea label="Observaciones" wire:model.live.debounce.250="form.observaciones" placeholder="Observaciones" inline first-error-only />
                 </div>
             </div>
@@ -152,6 +175,7 @@ new class extends Component {
                             </div>
                             <div class="lg:col-span-1 text-end">
                                 <x-button class="btn-warning btn-sm btn-soft" type="button" wire:click.prevent="edit({{ $item['id'] }})" spinner="edit" icon="o-pencil" tooltip="Editar"/>
+                                <x-button class="btn-error btn-sm btn-soft" type="button" wire:click.prevent="delete({{ $item['id'] }})" spinner="delete" icon="o-trash" tooltip="Eliminar"/>
                             </div>
                         </div>
                     @endforeach
@@ -160,3 +184,9 @@ new class extends Component {
         </x-table>
     </x-card>
 </div>
+<script>
+    window.addEventListener('scrollTo', function (event) {
+        const element = document.getElementById(event.detail.id);
+        element.scrollIntoView({ behavior: 'smooth' });
+    });
+</script>

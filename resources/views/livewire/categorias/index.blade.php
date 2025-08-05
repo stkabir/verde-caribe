@@ -35,8 +35,8 @@ new class extends Component {
 
     public function headers(): array {
         return [
-            ['key' => 'nombre', 'label' => 'Nombre', 'class' => 'w-100'],
-            ['key' => 'actions', 'label' => 'Acciones', 'class' => 'w-1', 'sortable' => false],
+            ['key' => 'nombre', 'label' => 'Nombre', 'class' => 'w-60'],
+            ['key' => 'actions', 'label' => 'Acciones', 'class' => 'w-40', 'sortable' => false],
         ];
     }
 
