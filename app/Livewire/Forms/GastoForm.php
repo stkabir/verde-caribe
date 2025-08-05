@@ -63,7 +63,7 @@ class GastoForm extends Form {
         ];
     }
     public function gastos($sortBy, $search, $export = false): Collection {
-        $gasto = Gasto::where('folio', 'like', "%{$search}%")->leftJoin('categorias', 'gastos.categoria_id', 'categorias.id')
+        $gasto = Gasto::select('gastos.id', 'folio', 'fecha', 'categorias.nombre', 'monto', 'producto', 'cantidad', 'observaciones')->where('folio', 'like', "%{$search}%")->leftJoin('categorias', 'gastos.categoria_id', 'categorias.id')
         ->orderBy($sortBy['column'], $sortBy['direction'])
         ->get();
         if($export) {
@@ -82,7 +82,6 @@ class GastoForm extends Form {
                 'total' => number_format($total, 2).'$',
             ];
         })->values();
-
         $this->gastos = $resultado;
         return $this->gastos;
     }
